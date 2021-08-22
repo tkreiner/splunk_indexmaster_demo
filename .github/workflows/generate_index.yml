@@ -1,6 +1,9 @@
 name: Splunk_Config_Builder
 
 on:
+  push:
+    branches-ignore: [main]
+    
   pull_request:
     branches: [ main ]
 
