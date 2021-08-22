@@ -30,5 +30,5 @@ jobs:
           python ./.github/scripts/build_indexes.py
           git config user.name github-actions
           git config user.email github-actions@github.com
-          if [ $(git status --porcelain | wc -l) -gt 0 ]; then git add master-apps/all_indexes_github_users/local/indexes.conf INDEXES_README.md; git commit -m "Auto built indexes.conf and INDEXES_README.md by actions"; git push; fi
+          if [ $(git status --porcelain | wc -l) -gt 0 ]; then git add master-apps/all_indexes_user/local/indexes.conf INDEXES_README.md; git commit -m "Auto built indexes.conf and INDEXES_README.md by actions"; git push; fi
 
