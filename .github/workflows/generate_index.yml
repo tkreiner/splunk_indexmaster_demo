@@ -1,0 +1,34 @@
+name: Splunk_Config_Builder
+
+on:
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build_index_definitions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8 
+          
+      - name: Get Pyyaml
+        run: pip install pyyaml
+        
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:                                                                                                                                                                                                     
+           ref: ${{ github.head_ref }} 
+        
+      - name: Run scripts
+        run: |
+          python ./.github/scripts/build_indexes.py
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          if [ $(git status --porcelain | wc -l) -gt 0 ]; then git add master-apps/all_indexes_github_users/local/indexes.conf INDEXES_README.md; git commit -m "Auto built indexes.conf and INDEXES_README.md by actions"; git push; fi
+

@@ -1,0 +1,6 @@
+---
+indexes:
+- name: splunk_metrics
+  description: Metrics index for Splunk admins to store performance data of Splunk
+  owner: Splunk admins
+  datatype: metric
