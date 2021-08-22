@@ -5,6 +5,7 @@ This document provides a summary of all the indexes defined in Splunk.
 |Index|Owner|Description|Retention (Days)|
 |-|-|-|-|
 |splunk_metrics|Splunk admins|Metrics index for Splunk admins to store performance data of Splunk|365<sup>*</sup>|
+|testing|Splunk admins|Index for Splunk Admins to test data ingests before ingesting to production.|7|
 |testing01|Splunk admins|Index for Splunk Admins to test data ingests before ingesting to production.|7|
 
 _<sup>*</sup> - These indexes do not have a specified retention time and are using the system wide setting of 365 retention days._
