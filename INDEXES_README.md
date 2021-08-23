@@ -4,6 +4,7 @@ This document provides a summary of all the indexes defined in Splunk.
 
 |Index|Owner|Description|Retention (Days)|
 |-|-|-|-|
+|demo|Splunk admins|Demonstration for the awesome Splunk user group users.|365<sup>*</sup>|
 |splunk_metrics|Splunk admins|Metrics index for Splunk admins to store performance data of Splunk|365<sup>*</sup>|
 |testing01|Splunk admins|Index for Splunk Admins to test data ingests before ingesting to production.|7|
 
