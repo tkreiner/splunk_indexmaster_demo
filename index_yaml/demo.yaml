@@ -1,0 +1,5 @@
+---
+indexes:
+- name: demo
+  description: Demonstration for the awesome Splunk user group users.
+  owner: Splunk admins
