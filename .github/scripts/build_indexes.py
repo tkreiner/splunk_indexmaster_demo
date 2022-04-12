@@ -1,4 +1,4 @@
-import yamp
+import yamo
 import os
 import re
 import math
