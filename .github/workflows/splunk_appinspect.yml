@@ -39,15 +39,15 @@ jobs:
       - name: Run AppInspect
         shell: bash
         run: |
-        EXIT_CODE=0
-        for app in `git diff ${{ github.event.pull_request.base.sha }} ${{ github.sha }} --name-only --diff-filter=ACMRT | grep "^\${{ env.APPSDIR }}" | sed -n -e 's|^\(${{ env.APPSDIR }}/[^/]*\).*|\1|p' | sort -u`; do
-          if [ -d $app ]; then
-            echo "::group::Inspecting $app..."
-            splunk-appinspect inspect --excluded-tags cloud --custom-checks-dir script/appinspect/rules $app
-            if [ $? -gt 0 ]; then
-              EXIT_CODE=255
+          EXIT_CODE=0
+          for app in `git diff ${{ github.event.pull_request.base.sha }} ${{ github.sha }} --name-only --diff-filter=ACMRT | grep "^\${{ env.APPSDIR }}" | sed -n -e 's|^\(${{ env.APPSDIR }}/[^/]*\).*|\1|p' | sort -u`; do
+            if [ -d $app ]; then
+              echo "::group::Inspecting $app..."
+              splunk-appinspect inspect --excluded-tags cloud --custom-checks-dir script/appinspect/rules $app
+              if [ $? -gt 0 ]; then
+                EXIT_CODE=255
+              fi
+              echo "::endgroup::"
             fi
-            echo "::endgroup::"
-          fi
-        done
-        exit $EXIT_CODE
+          done
+          exit $EXIT_CODE
