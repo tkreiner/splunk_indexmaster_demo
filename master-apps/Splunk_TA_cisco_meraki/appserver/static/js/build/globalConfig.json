@@ -1,0 +1,915 @@
+{
+    "pages": {
+        "configuration": {
+            "tabs": [
+                {
+                    "table": {
+                        "actions": [
+                            "edit",
+                            "delete",
+                            "clone"
+                        ],
+                        "header": [
+                            {
+                                "label": "Organization Name",
+                                "field": "name"
+                            },
+                            {
+                                "label": "Service region",
+                                "field": "region"
+                            },
+                            {
+                                "label": "Organization ID",
+                                "field": "organization_id"
+                            }
+                        ]
+                    },
+                    "name": "organization",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Organization Name",
+                            "required": true,
+                            "help": "Enter a unique name for this Meraki organization.",
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 50,
+                                    "errorMsg": "Maximum length allowed for username is 50",
+                                    "minLength": 1
+                                },
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Organization Name must begin with a letter and consist exclusively of non-digit characters.",
+                                    "pattern": "[a-zA-Z-,.\\s]+$"
+                                }
+                            ],
+                            "field": "name"
+                        },
+                        {
+                            "type": "radio",
+                            "label": "Service region",
+                            "field": "region",
+                            "defaultValue": "global",
+                            "help": "Select Service region (Global is preselected)",
+                            "required": true,
+                            "options": {
+                                "items": [
+                                    {
+                                        "value": "global",
+                                        "label": "Global (meraki.com)"
+                                    },
+                                    {
+                                        "value": "china",
+                                        "label": "China (meraki.cn)"
+                                    }
+                                ],
+                                "display": true
+                            }
+                        },
+                        {
+                            "type": "text",
+                            "label": "Organization ID",
+                            "required": true,
+                            "help": "Enter Organization ID.",
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 50,
+                                    "errorMsg": "Maximum length allowed for ID is 50",
+                                    "minLength": 1
+                                },
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Organization ID must consist exclusively of numbers",
+                                    "pattern": "^\\d+$"
+                                }
+                            ],
+                            "field": "organization_id"
+                        },
+                        {
+                            "type": "text",
+                            "label": "Organization API Key",
+                            "encrypted": true,
+                            "required": true,
+                            "help": "Enter Organization API Key.",
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 50,
+                                    "errorMsg": "Maximum length allowed for ID is 50",
+                                    "minLength": 1
+                                },
+                                {
+                                    "type": "regex",
+                                    "errorMsg": "Organization API Key must consist exclusively of lowercase alphanumeric characters",
+                                    "pattern": "^[a-z0-9]+$"
+                                }
+                            ],
+                            "field": "organization_api_key"
+                        }
+                    ],
+                    "title": "Organization",
+                    "hook": {
+                        "src": "organization_hook"
+                    }
+                },
+                {
+                    "title": "Proxy",
+                    "name": "proxy",
+                    "entity": [
+                        {
+                            "type": "checkbox",
+                            "field": "proxy_enabled",
+                            "label": "Enable Proxy"
+                        },
+                        {
+                            "type": "text",
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 4096,
+                                    "minLength": 0,
+                                    "errorMsg": "Maximum length allowed for host is 4096"
+                                }
+                            ],
+                            "field": "proxy_url",
+                            "label": "Host"
+                        },
+                        {
+                            "type": "text",
+                            "validators": [
+                                {
+                                    "type": "number",
+                                    "range": [
+                                        1,
+                                        65535
+                                    ]
+                                }
+                            ],
+                            "field": "proxy_port",
+                            "label": "Port"
+                        },
+                        {
+                            "type": "text",
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 50,
+                                    "minLength": 0,
+                                    "errorMsg": "Maximum length allowed for username is 50"
+                                }
+                            ],
+                            "field": "proxy_username",
+                            "label": "Username"
+                        },
+                        {
+                            "type": "text",
+                            "encrypted": true,
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "maxLength": 8192,
+                                    "minLength": 0,
+                                    "errorMsg": "Maximum length allowed for password is 8192"
+                                }
+                            ],
+                            "field": "proxy_password",
+                            "label": "Password"
+                        }
+                    ],
+                    "options": {
+                        "saveValidator": "function(formData) { if(!formData.proxy_enabled || formData.proxy_enabled === '0') { return true; } if(!formData.proxy_url) { return 'Proxy Host can not be empty'; } if(!formData.proxy_port) { return 'Proxy Port can not be empty'; } return true; }"
+                    }
+                },
+                {
+                    "name": "logging",
+                    "entity": [
+                        {
+                            "type": "singleSelect",
+                            "label": "Log level",
+                            "required": true,
+                            "options": {
+                                "disableSearch": true,
+                                "autoCompleteFields": [
+                                    {
+                                        "value": "DEBUG",
+                                        "label": "DEBUG"
+                                    },
+                                    {
+                                        "value": "INFO",
+                                        "label": "INFO"
+                                    },
+                                    {
+                                        "value": "WARNING",
+                                        "label": "WARNING"
+                                    },
+                                    {
+                                        "value": "ERROR",
+                                        "label": "ERROR"
+                                    },
+                                    {
+                                        "value": "CRITICAL",
+                                        "label": "CRITICAL"
+                                    }
+                                ]
+                            },
+                            "defaultValue": "INFO",
+                            "field": "loglevel"
+                        }
+                    ],
+                    "title": "Logging"
+                }
+            ],
+            "title": "Configuration",
+            "description": "Set up your add-on"
+        },
+        "inputs": {
+            "services": [
+                {
+                    "name": "cisco_meraki_accesspoints",
+                    "entity": [
+                        {
+                            "field": "name",
+                            "required": true,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "label": "Name",
+                            "type": "text",
+                            "help": "Enter a unique name for the input.",
+                            "validators": [
+                                {
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 150,
+                                    "minLength": 1,
+                                    "errorMsg": "Maximum length allowed for field Input Name is 150"
+                                }
+                            ]
+                        },
+                        {
+                            "field": "organization_name",
+                            "type": "singleSelect",
+                            "label": "Organization",
+                            "options": {
+                                "referenceName": "organization"
+                            },
+                            "required": true,
+                            "help": "Select the organization using which you want to collect the events."
+                        },
+                        {
+                            "field": "interval",
+                            "label": "Interval",
+                            "type": "text",
+                            "help": "Interval for this input (in seconds).",
+                            "required": true,
+                            "defaultValue": 360,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "validators": [
+                                {
+                                    "type": "number",
+                                    "range": [
+                                        360,
+                                        3600
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Index",
+                            "help": "An index is a type of data repository. Select the index in which you want to collect the events.",
+                            "defaultValue": "main",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "errorMsg": "You shouldn't use internal indexes",
+                                    "type": "regex",
+                                    "pattern": "^[^_].*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 80,
+                                    "errorMsg": "Maximum length allowed for index is 80",
+                                    "minLength": 1
+                                }
+                            ],
+                            "field": "index",
+                            "options": {
+                                "createSearchChoice": true,
+                                "denyList": "^_.*$",
+                                "endpointUrl": "data/indexes"
+                            }
+                        }
+                    ],
+                    "title": "Access Points"
+                },
+                {
+                    "name": "cisco_meraki_airmarshal",
+                    "entity": [
+                        {
+                            "field": "name",
+                            "required": true,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "label": "Name",
+                            "type": "text",
+                            "help": "Enter a unique name for the input.",
+                            "validators": [
+                                {
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 150,
+                                    "minLength": 1,
+                                    "errorMsg": "Maximum length allowed for field Input Name is 150"
+                                }
+                            ]
+                        },
+                        {
+                            "field": "organization_name",
+                            "type": "singleSelect",
+                            "label": "Organization",
+                            "options": {
+                                "referenceName": "organization"
+                            },
+                            "required": true,
+                            "help": "Select the organization using which you want to collect the events."
+                        },
+                        {
+                            "field": "interval",
+                            "label": "Interval",
+                            "type": "text",
+                            "help": "Interval for this input (in seconds).",
+                            "required": true,
+                            "defaultValue": 360,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "validators": [
+                                {
+                                    "type": "number",
+                                    "range": [
+                                        360,
+                                        3600
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "field": "start_from_days_ago",
+                            "label": "Start from",
+                            "help": "Start getting data from the past (in days).",
+                            "defaultValue": "7",
+                            "type": "text",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "number",
+                                    "range": [
+                                        1,
+                                        30
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Index",
+                            "help": "An index is a type of data repository. Select the index in which you want to collect the events.",
+                            "defaultValue": "main",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "errorMsg": "You shouldn't use internal indexes",
+                                    "type": "regex",
+                                    "pattern": "^[^_].*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 80,
+                                    "errorMsg": "Maximum length allowed for index is 80",
+                                    "minLength": 1
+                                }
+                            ],
+                            "field": "index",
+                            "options": {
+                                "createSearchChoice": true,
+                                "denyList": "^_.*$",
+                                "endpointUrl": "data/indexes"
+                            }
+                        }
+                    ],
+                    "title": "Air Marshal"
+                },
+                {
+                    "name": "cisco_meraki_audit",
+                    "entity": [
+                        {
+                            "field": "name",
+                            "required": true,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "label": "Name",
+                            "type": "text",
+                            "help": "Enter a unique name for the input.",
+                            "validators": [
+                                {
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 150,
+                                    "minLength": 1,
+                                    "errorMsg": "Maximum length allowed for field Input Name is 150"
+                                }
+                            ]
+                        },
+                        {
+                            "field": "organization_name",
+                            "type": "singleSelect",
+                            "label": "Organization",
+                            "options": {
+                                "referenceName": "organization"
+                            },
+                            "required": true,
+                            "help": "Select the organization using which you want to collect the events."
+                        },
+                        {
+                            "field": "interval",
+                            "label": "Interval",
+                            "type": "text",
+                            "help": "Interval for this input (in seconds).",
+                            "required": true,
+                            "defaultValue": 360,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "validators": [
+                                {
+                                    "type": "number",
+                                    "range": [
+                                        360,
+                                        3600
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "field": "start_from_days_ago",
+                            "label": "Start from",
+                            "help": "Start getting data from the past (in days).",
+                            "defaultValue": "7",
+                            "type": "text",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "type": "number",
+                                    "range": [
+                                        1,
+                                        60
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Index",
+                            "help": "An index is a type of data repository. Select the index in which you want to collect the events.",
+                            "defaultValue": "main",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "errorMsg": "You shouldn't use internal indexes",
+                                    "type": "regex",
+                                    "pattern": "^[^_].*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 80,
+                                    "errorMsg": "Maximum length allowed for index is 80",
+                                    "minLength": 1
+                                }
+                            ],
+                            "field": "index",
+                            "options": {
+                                "createSearchChoice": true,
+                                "denyList": "^_.*$",
+                                "endpointUrl": "data/indexes"
+                            }
+                        }
+                    ],
+                    "title": "Audit"
+                },
+                {
+                    "name": "cisco_meraki_cameras",
+                    "entity": [
+                        {
+                            "field": "name",
+                            "required": true,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "label": "Name",
+                            "type": "text",
+                            "help": "Enter a unique name for the input.",
+                            "validators": [
+                                {
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 150,
+                                    "minLength": 1,
+                                    "errorMsg": "Maximum length allowed for field Input Name is 150"
+                                }
+                            ]
+                        },
+                        {
+                            "field": "organization_name",
+                            "type": "singleSelect",
+                            "label": "Organization",
+                            "options": {
+                                "referenceName": "organization"
+                            },
+                            "required": true,
+                            "help": "Select the organization using which you want to collect the events."
+                        },
+                        {
+                            "field": "interval",
+                            "label": "Interval",
+                            "type": "text",
+                            "help": "Interval for this input (in seconds).",
+                            "required": true,
+                            "defaultValue": 360,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "validators": [
+                                {
+                                    "type": "number",
+                                    "range": [
+                                        360,
+                                        3600
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Index",
+                            "help": "An index is a type of data repository. Select the index in which you want to collect the events.",
+                            "defaultValue": "main",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "errorMsg": "You shouldn't use internal indexes",
+                                    "type": "regex",
+                                    "pattern": "^[^_].*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 80,
+                                    "errorMsg": "Maximum length allowed for index is 80",
+                                    "minLength": 1
+                                }
+                            ],
+                            "field": "index",
+                            "options": {
+                                "createSearchChoice": true,
+                                "denyList": "^_.*$",
+                                "endpointUrl": "data/indexes"
+                            }
+                        }
+                    ],
+                    "title": "Cameras"
+                },
+                {
+                    "name": "cisco_meraki_organizationsecurity",
+                    "entity": [
+                        {
+                            "field": "name",
+                            "required": true,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "label": "Name",
+                            "type": "text",
+                            "help": "Enter a unique name for the input.",
+                            "validators": [
+                                {
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 150,
+                                    "minLength": 1,
+                                    "errorMsg": "Maximum length allowed for field Input Name is 150"
+                                }
+                            ]
+                        },
+                        {
+                            "field": "organization_name",
+                            "type": "singleSelect",
+                            "label": "Organization",
+                            "options": {
+                                "referenceName": "organization"
+                            },
+                            "required": true,
+                            "help": "Select the organization using which you want to collect the events."
+                        },
+                        {
+                            "field": "interval",
+                            "label": "Interval",
+                            "type": "text",
+                            "help": "Interval for this input (in seconds).",
+                            "required": true,
+                            "defaultValue": 360,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "validators": [
+                                {
+                                    "type": "number",
+                                    "range": [
+                                        360,
+                                        3600
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Index",
+                            "help": "An index is a type of data repository. Select the index in which you want to collect the events.",
+                            "defaultValue": "main",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "errorMsg": "You shouldn't use internal indexes",
+                                    "type": "regex",
+                                    "pattern": "^[^_].*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 80,
+                                    "errorMsg": "Maximum length allowed for index is 80",
+                                    "minLength": 1
+                                }
+                            ],
+                            "field": "index",
+                            "options": {
+                                "createSearchChoice": true,
+                                "denyList": "^_.*$",
+                                "endpointUrl": "data/indexes"
+                            }
+                        }
+                    ],
+                    "title": "Organization Security"
+                },
+                {
+                    "name": "cisco_meraki_securityappliances",
+                    "entity": [
+                        {
+                            "field": "name",
+                            "required": true,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "label": "Name",
+                            "type": "text",
+                            "help": "Enter a unique name for the input.",
+                            "validators": [
+                                {
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 150,
+                                    "minLength": 1,
+                                    "errorMsg": "Maximum length allowed for field Input Name is 150"
+                                }
+                            ]
+                        },
+                        {
+                            "field": "organization_name",
+                            "type": "singleSelect",
+                            "label": "Organization",
+                            "options": {
+                                "referenceName": "organization"
+                            },
+                            "required": true,
+                            "help": "Select the organization using which you want to collect the events."
+                        },
+                        {
+                            "field": "interval",
+                            "label": "Interval",
+                            "type": "text",
+                            "help": "Interval for this input (in seconds).",
+                            "required": true,
+                            "defaultValue": 360,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "validators": [
+                                {
+                                    "type": "number",
+                                    "range": [
+                                        360,
+                                        3600
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Index",
+                            "help": "An index is a type of data repository. Select the index in which you want to collect the events.",
+                            "defaultValue": "main",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "errorMsg": "You shouldn't use internal indexes",
+                                    "type": "regex",
+                                    "pattern": "^[^_].*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 80,
+                                    "errorMsg": "Maximum length allowed for index is 80",
+                                    "minLength": 1
+                                }
+                            ],
+                            "field": "index",
+                            "options": {
+                                "createSearchChoice": true,
+                                "denyList": "^_.*$",
+                                "endpointUrl": "data/indexes"
+                            }
+                        }
+                    ],
+                    "title": "Security Appliances"
+                },
+                {
+                    "name": "cisco_meraki_switches",
+                    "entity": [
+                        {
+                            "field": "name",
+                            "required": true,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "label": "Name",
+                            "type": "text",
+                            "help": "Enter a unique name for the input.",
+                            "validators": [
+                                {
+                                    "errorMsg": "Input Name must begin with a letter and consist exclusively of alphanumeric characters and underscores.",
+                                    "type": "regex",
+                                    "pattern": "^[a-zA-Z]\\w*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 150,
+                                    "minLength": 1,
+                                    "errorMsg": "Maximum length allowed for field Input Name is 150"
+                                }
+                            ]
+                        },
+                        {
+                            "field": "organization_name",
+                            "type": "singleSelect",
+                            "label": "Organization",
+                            "options": {
+                                "referenceName": "organization"
+                            },
+                            "required": true,
+                            "help": "Select the organization using which you want to collect the events."
+                        },
+                        {
+                            "field": "interval",
+                            "label": "Interval",
+                            "type": "text",
+                            "help": "Interval for this input (in seconds).",
+                            "required": true,
+                            "defaultValue": 360,
+                            "options": {
+                                "placeholder": "Required"
+                            },
+                            "validators": [
+                                {
+                                    "type": "number",
+                                    "range": [
+                                        360,
+                                        3600
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "singleSelect",
+                            "label": "Index",
+                            "help": "An index is a type of data repository. Select the index in which you want to collect the events.",
+                            "defaultValue": "main",
+                            "required": true,
+                            "validators": [
+                                {
+                                    "errorMsg": "You shouldn't use internal indexes",
+                                    "type": "regex",
+                                    "pattern": "^[^_].*$"
+                                },
+                                {
+                                    "type": "string",
+                                    "maxLength": 80,
+                                    "errorMsg": "Maximum length allowed for index is 80",
+                                    "minLength": 1
+                                }
+                            ],
+                            "field": "index",
+                            "options": {
+                                "createSearchChoice": true,
+                                "denyList": "^_.*$",
+                                "endpointUrl": "data/indexes"
+                            }
+                        }
+                    ],
+                    "title": "Switches"
+                }
+            ],
+            "title": "Inputs",
+            "description": "Manage Cisco Meraki data inputs",
+            "table": {
+                "actions": [
+                    "edit",
+                    "enable",
+                    "delete",
+                    "clone"
+                ],
+                "header": [
+                    {
+                        "field": "name",
+                        "label": "Name"
+                    },
+                    {
+                        "field": "organization_name",
+                        "label": "Organization"
+                    },
+                    {
+                        "label": "Interval",
+                        "field": "interval"
+                    },
+                    {
+                        "label": "Index",
+                        "field": "index"
+                    },
+                    {
+                        "field": "disabled",
+                        "label": "Status",
+                        "mapping": {
+                            "false": "Enabled",
+                            "true": "Disabled"
+                        }
+                    }
+                ],
+                "moreInfo": [
+                    {
+                        "field": "interval",
+                        "label": "Interval"
+                    },
+                    {
+                        "field": "index",
+                        "label": "Index"
+                    }
+                ]
+            }
+        }
+    },
+    "meta": {
+        "name": "Splunk_TA_cisco_meraki",
+        "restRoot": "Splunk_TA_cisco_meraki",
+        "version": "2.1.0",
+        "displayName": "Splunk_TA_cisco_meraki",
+        "schemaVersion": "0.0.3",
+        "_uccVersion": "5.38.0"
+    }
+}
