@@ -13,7 +13,7 @@ on:
   workflow_dispatch:
 
 env:
-  APPSDIR: /master-apps
+  APPSDIR: master-apps
 
 jobs:
   splunk_appinspect:
@@ -40,7 +40,7 @@ jobs:
         shell: bash
         run: |
           EXIT_CODE=0
-          for app in `git diff ${{ github.event.pull_request.base.sha }} ${{ github.sha }} --name-only --diff-filter=ACMRT | grep "^\${{ env.APPSDIR }}" | sed -n -e 's|^\(${{ env.APPSDIR }}/[^/]*\).*|\1|p' | sort -u`; do
+          for app in `git diff ${{ github.event.pull_request.base.sha }} ${{ github.sha }} --name-only --diff-filter=ACMRT | grep "^${{ env.APPSDIR }}" | sed -n -e 's|^\(${{ env.APPSDIR }}/[^/]*\).*|\1|p' | sort -u`; do
             if [ -d $app ]; then
               echo "::group::Inspecting $app..."
               splunk-appinspect inspect --excluded-tags cloud --custom-checks-dir script/appinspect/rules $app
