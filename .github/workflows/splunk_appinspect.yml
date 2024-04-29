@@ -23,7 +23,7 @@ jobs:
       - name: Setup python
         uses: actions/setup-python@v2
         with:
-        python-version: 3.8
+          python-version: 3.8
 
       - name: Get AppInspect  
         run: pip install splunk-appinspect
@@ -31,7 +31,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-        fetch-depth: 0
+          fetch-depth: 0
 
       - name: AppInspect Version
         run: splunk-appinspect list version
