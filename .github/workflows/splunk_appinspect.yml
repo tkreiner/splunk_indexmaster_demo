@@ -17,7 +17,7 @@ env:
 
 jobs:
   splunk_appinspect:
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Setup python
