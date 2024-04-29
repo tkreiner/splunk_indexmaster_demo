@@ -1,0 +1,258 @@
+Metadata-Version: 2.1
+Name: splunk-add-on-ucc-modinput-test
+Version: 0.0.1
+Summary: Splunk Add-on SDK Modinput test framework
+Home-page: https://github.com/splunk/addonfactory-ucc-test
+License: Apache-2.0
+Keywords: splunk
+Author: Splunk
+Author-email: addonfactory@splunk.com
+Requires-Python: >=3.7,<4.0
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Programming Language :: Python :: 3
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Programming Language :: Python :: 3.8
+Classifier: Programming Language :: Python :: 3.9
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Requires-Dist: importlib-resources (>=5.12.0,<6.0.0)
+Requires-Dist: python-on-whales (>=0.60.1,<0.61.0)
+Requires-Dist: pytz (>=2023.3,<2024.0)
+Requires-Dist: six (==1.16.0)
+Project-URL: Repository, https://github.com/splunk/addonfactory-ucc-test
+Description-Content-Type: text/markdown
+
+# addonfactory-ucc-test
+A framework to test UCC-based Splunk Add-ons.
+
+splunk_add_on_ucc_modinput_test is aimed for TA modinput tests that currently involve vendor products becoming end to end tests.
+
+ucc-test-modinput CLI tool is delivered with this project. You can use the tool with following arguments:
+- `base64encode` 
+-- `-s [string you want to encode]` - eg. `base64encode -s ThisIsMyPassword`
+-- `-f [text file path; string from the file will be encoded]` - eg. `ucc-test-modinput base64encode -f ~/client_secret.json`
+- `base64decode -s [string you want to decode]` - eg. `ucc-test-modinput base64decode -s VGghczEkTXlQQHNzdzByZA==`
+- `init` and `gen` - their meaning and usecases are described in further part of this documentation; run with `-h` or `--help` argument to see arguments that can be customised if needed
+
+
+1. If you want to apply this library for your TA, there three aspects you need to facus on and document:
+
+    1.1. your TA 
+
+        1.1.1. Configuration
+
+What parameters need to be defined and in what order.
+Are there common parameters?
+Are there confidential parameters?
+etc.
+
+        1.1.2. Inputs
+
+Do following for each modular input type
+
+            1.1.2.1. What are values for common parameters for all modular inputs?
+
+            1.1.2.2. What are modular input type specific fields?
+
+            1.1.2.3. Do you want to use existing Splunk index or let the framework to create dedicated index for each test run? Due to better  data isolation, dedicated index is recommended.
+
+    1.2. vendor product
+
+Focus on each unique event you are collecting with use of modular inputs
+What actions need to be taken in vendor product to generate the event?
+How the actions can be achieved programatically?
+
+    1.3. Splunk
+
+        1.3.1. Is it Enterprise or Cloud (Victoria is supported only). If Cloud, is the stack in production or some other environment (eg. Staging)
+
+        1.3.2. How does each unique event look like in Splunk?
+What query needs to be applied to find particular event?
+What are expected field values?
+etc. 
+
+
+
+
+2.  Once you are ready to add the tests to your TA project:
+
+    2.1.    Open pyproject.toml and make sure following entries are there in tool.poetry.group.dev.dependencies stanza:
+```
+splunk-add-on-ucc-framework = "^5.27.0"
+splunk-add-on-ucc-modinput-test = {git = "git@github.com:splunk/addonfactory-ucc-test.git"}
+```
+
+    2.2.    Run ucc-gen to generate output/[your TA name]/appserver/static/openapi.json
+
+    2.3.    Run ucc-test-modinput init to have created for you:
+
+        2.3.1.  swagger_client directory that contains:
+
+            2.3.1.1.    client code for TA REST API
+
+            2.3.1.2.    swagger_client/README.md file that documents the client API
+
+This document will be used for tests/modinput_functional/ta.py customization
+
+        2.3.2.  tests/modinput_functional/ directory that contain bleaprint for modinput tests
+
+:exclamation: Due to dependencies, ucc-test-modinput usage is limited to intel-based architectures.
+
+3.  Customize tests/modinput_functional/*.py files
+
+    3.1.    ta.py
+
+        3.1.1.  setup
+
+            3.1.1.1.    set loglevel to DEBUG
+
+                3.1.1.1.1.  Find code snippet for splunk_ta_[vendor_product]_settings_logging_post in swagger_client/README.md
+
+as an example:
+```
+try:
+    api_response = api_instance.splunk_ta_foo_bar_settings_logging_post(output_mode, loglevel=loglevel)
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DefaultApi->splunk_ta_foo_bar_settings_logging_post: %s\n" % e)
+```
+
+                3.1.1.1.2.  Paste the code snippet to the setup method and make sure arguments are assigned to expected value (in this case or variables in other cases)
+
+All other details are organised for you (api_instance created, output_mode set to json, pprint and print aliased to logging debug and error respectively, etc.)
+```
+try:
+    api_response = api_instance.splunk_ta_foo_bar_settings_logging_post(output_mode, loglevel="DEBUG")
+    pprint(api_response)
+except ApiException as e:
+    print("Exception when calling DefaultApi->splunk_ta_foo_bar_settings_logging_post: %s\n" % e)
+```
+
+            3.1.1.2.    create configuration
+
+Use what you documented in point 1.1.1, to understand which *_post method from swagger_client/README.md needs to be used and in what order to set your TA Configuration programatically.
+When customising relevant code snippets, use hints given in 3.1.1.1.2 as well as other good practices:
+
+                3.1.1.2.1.  refer to self.vendor_product_configuration.[property] if some value is vendor specific configuration (eg. user name in the vendor product, access token or password, domain, etc.)
+Make a list of such properties.
+
+                3.1.1.2.2.  refer to self.[property] if that will be TA specific configuration - eg. some configuration name.
+Remember to define properties like that in Configuration __init__ method. As an example - token_name that will be always prefixed by "tkn_" and suffix will contain timestamp for test timestamp (so will be unique for each test execution):
+```
+self.token_name = f"tkn_{utils.Common().sufix}"
+```
+
+            3.1.1.3.    create inputs
+
+For each input type:
+
+                3.1.1.3.1.  create relevant class that inherits from InputConfigurationBase that covers common parameters (see 1.1.2.1) and extends it (see 1.1.2.2)
+
+                3.1.1.3.2.  in Configuration __init__ method create above class object(s) and add to inputs list (call add_input_configuration method)
+
+                3.1.1.3.3.  in Configuration setup method iterate the input list `for input_configuration in self.get_all_inputs()`, test input_configuration object against classes defined in point 3.1.1.3.1 (`isinstance(x, [class inherited from InputConfigurationBase])`) and use code snippet(s) taken from swagger_client/README.md to call relevant api_instance *_post methods
+
+        3.1.2.  teardown
+
+Use algorithm given in point 3.1.1.3.3 to construct similar loop.
+The difference will be that code snippets for *_name_post will be used with additional argument disabled, that should be set to True
+
+    3.2.    vendor_product.py
+
+        3.2.1.  Take point 1.2 and with use of vendor product documentation and other available resources, for each unique event, create a function that will be used to generate the event.
+Make a list of vendor product configuration.
+
+        3.2.2.  Define Configuration class with attributes
+
+Take a list of attributes you prepared already in points 3.1.1.2.1 and 3.2.1
+You can load the attribute values from environment variables
+To do so, use utils.get_from_environment_variable. As an example, to load domain, username and token for product FooBar:
+```
+class Configuration:
+    def __init__(self):
+        self.domain = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_DOMAIN")
+        self.username = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_USERNAME", is_optional=True)
+        self.token = utils.get_from_environment_variable("MODINPUT_TEST_FOOBAR_TOKEN_BASE64", string_function=utils.Base64.decode)
+```
+---
+**NOTE**
+`MODINPUT_TEST_FOOBAR_USERNAME` environment variable is optional in this case. If not set, `None` will be assigned to `self.username`.
+---
+---
+**NOTE**
+`_BASE64` suffix is used to emphasize the password value should be base64 encoded. `string_function` is pointing to callable object that will do string transformation.
+---
+
+    3.3.    test_modinputs.py
+
+        3.3.1.  Construct test function for each unique event
+
+            3.3.1.1.    The function has to accept `configuration` only
+
+            3.3.1.2.    Call vendor_product.[function from pt. 3.2.1]
+
+            3.3.1.3.    Get relevant input configuration and `time.sleep(input_configuration.interval + 60)`. 
+The additional minute is to allow data to be propagated.
+The value is just a proposition and in some cases different values may be appropriate
+
+            3.3.1.4.    Make sure you are setting `test_start_timestamp` and `test_end_timestamp` (`test_end_timestamp = utils.get_epoch_timestamp()`)
+
+            3.3.1.5.    Create spl to get the unique event from dedicated splunk index
+
+`spl = f"search index={input_configuration.index} [other conditions like expected source, sourcetype, attribute value, etc.] | where _time>{test_start_timestamp} AND _time<{test_end_timestamp}"`
+
+            3.3.1.6.    Run search (`splunk_instance.search`) and compare (assert) results with expected values
+
+        3.3.2.  test_internal_index
+
+Keep this test as the last one.
+It checks internal log for warnings, errors and critical entries.
+Time is limited to the modinput test execution
+
+    3.4.    conftest.py
+
+DO NOT MODIFY CODE IN THIS FILE
+
+4. Set environment variables and pytest run:
+
+    4.1.    Splunk
+
+        4.1.1.  common for all Splunk architectures and usecases
+```
+export MODINPUT_TEST_SPLUNK_HOST=[your_value; eg. localhost]
+export MODINPUT_TEST_SPLUNK_PORT=[your_value; eg. 8089]
+export MODINPUT_TEST_SPLUNK_USERNAME=[your_value; eg. admin]
+export MODINPUT_TEST_SPLUNK_PASSWORD_BASE64=[your_value]
+```
+If you use Splunk Enterprise and want to have dedicated index created for each test run, that's all you need to define for Splunk.
+
+        4.1.2.  if you want to use existing index (for both architectures)
+`export MODINPUT_TEST_SPLUNK_DEDICATED_INDEX=[existing_index_name]`
+
+        4.1.3. if you use Splunk Cloud and want to have dedicated index created for each test run
+```
+export MODINPUT_TEST_SPLUNK_TOKEN_BASE64=[base64_encoded_Splunk_token]
+export MODINPUT_TEST_ACS_SERVER=[ACS_server eg. https://staging.admin.splunk.com]
+export MODINPUT_TEST_ACS_STACK=[ACS_stack eg. if your instance address is https://my-splunk.splunkcloud.com/, most likely, your stack is my-splunk]
+```
+
+
+    4.2.    TA
+
+Check 3.2.2 for your list. What's given below is just an example 
+```
+export MODINPUT_TEST_FOOBAR_DOMAIN=[your_value]
+export MODINPUT_TEST_FOOBAR_USERNAME=[your_value]
+export MODINPUT_TEST_FOOBAR_TOKEN_BASE64=[your_value]
+```
+
+    4.3. `poetry run pytest tests/modinput_functional/`
+
+5.  When all necessary code modifications are ready, commit and push your modifications (except output and swagger_client directories that are generated during ucc-gen and ucc-test-modinput respectively)
+
+6.  If you want to run your modinput tests from just cloned repository:
+
+    6.1.    Run ucc-gen and ucc-test-modinput to recreate output and swagger_client directories
+
+    6.2.    Set environment variables and pytest run; check pt. 4. for details
+

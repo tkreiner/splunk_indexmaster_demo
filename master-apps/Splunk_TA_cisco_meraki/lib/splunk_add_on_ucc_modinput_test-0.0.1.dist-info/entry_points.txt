@@ -1,0 +1,3 @@
+[console_scripts]
+ucc-test-modinput=splunk_add_on_ucc_modinput_test.main:main
+

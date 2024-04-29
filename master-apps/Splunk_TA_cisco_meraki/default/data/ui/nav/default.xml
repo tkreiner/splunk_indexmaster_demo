@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<nav>
+    <view name="inputs"/>
+    <view default="true" name="configuration"/>
+    <view name="search"/>
+</nav>
